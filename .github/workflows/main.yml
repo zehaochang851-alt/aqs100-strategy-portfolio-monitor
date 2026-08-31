@@ -4,12 +4,6 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
-    inputs:
-      telegram_test:
-        description: "只在手動測試時選 true；平常選 false"
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -41,7 +35,7 @@ jobs:
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_TEST: ${{ inputs.telegram_test || 'false' }}
+          TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: python monitor.py
 
       - name: Save notification state
