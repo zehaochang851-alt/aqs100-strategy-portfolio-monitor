@@ -19,6 +19,7 @@ STATE_PATH = ROOT / "state.json"
 ALPACA_URL = "https://data.alpaca.markets/v2/stocks/bars"
 TIMEFRAME_MAP = {"1d": "1Day", "1h": "1Hour", "30m": "30Min", "15m": "15Min", "5m": "5Min", "1m": "1Min"}
 ANNUALIZATION = {"1d": 252, "1h": 2016, "30m": 4032, "15m": 8064, "5m": 24192, "1m": 120960}[INTERVAL]
+INITIAL_CAPITAL_USD = float(CONFIG.get("initial_capital_usd", 10000.0))
 
 
 def env_required(name):
@@ -180,8 +181,11 @@ def main():
     state.setdefault("daily_anchor_pnl", 0.0)
     events = []
     strategy_pnl = {}
+    strategy_dollar_pnl = {}
+    strategy_allocations = {}
     latest_bar = None
     fee = 0.0006
+    total_weight = sum(float(s.get("weight", 0.0)) for s in STRATEGIES) or 1.0
 
     for spec in STRATEGIES:
         target = spec["target"]
@@ -196,6 +200,8 @@ def main():
         old = state["strategies"].get(spec["strategy_id"], {})
         old_signal = float(old.get("signal", 0.0))
         cumulative = float(old.get("cumulative_pnl", 0.0))
+        allocated_capital = INITIAL_CAPITAL_USD * float(spec.get("weight", 0.0)) / total_weight
+        current_shares = int(old.get("reference_shares", 0))
         last_bar_text = old.get("last_bar")
         previous_pos = None
         if last_bar_text:
@@ -213,44 +219,64 @@ def main():
                 bar_pnl = float(signal[j - 1] * ret[j] - trade * fee) if j > 0 else 0.0
                 cumulative += bar_pnl
                 if float(signal[j]) != float(signal[j - 1]):
-                    events.append({"target": target, "action": "ENTRY" if signal[j] != 0 else "EXIT", "price": float(frame["close"].iloc[j]), "bar_time": str(frame.index[j]), "strategy_id": spec["strategy_id"], "signal": float(signal[j])})
+                    event_price = float(frame["close"].iloc[j])
+                    is_entry = float(signal[j]) != 0.0
+                    if is_entry:
+                        event_shares = int(math.floor(allocated_capital / event_price)) if event_price > 0 else 0
+                        current_shares = event_shares
+                    else:
+                        event_shares = current_shares
+                        current_shares = 0
+                    events.append({"target": target, "action": "ENTRY" if is_entry else "EXIT", "price": event_price, "shares": event_shares, "allocated_capital": allocated_capital, "bar_time": str(frame.index[j]), "strategy_id": spec["strategy_id"], "signal": float(signal[j])})
         current = float(signal[-1])
         close = float(frame["close"].iloc[-1])
+        if current != 0.0 and current_shares <= 0:
+            current_shares = int(math.floor(allocated_capital / close)) if close > 0 else 0
+        if current == 0.0:
+            current_shares = 0
         strategy_pnl[spec["strategy_id"]] = cumulative
-        state["strategies"][spec["strategy_id"]] = {"signal": current, "last_bar": str(bar_time), "last_price": close, "cumulative_pnl": cumulative}
+        strategy_dollar_pnl[spec["strategy_id"]] = cumulative * allocated_capital
+        strategy_allocations[spec["strategy_id"]] = allocated_capital
+        state["strategies"][spec["strategy_id"]] = {"signal": current, "last_bar": str(bar_time), "last_price": close, "reference_shares": current_shares, "allocated_capital": allocated_capital, "cumulative_pnl": cumulative, "dollar_pnl": cumulative * allocated_capital}
 
     total_weight = sum(float(s["weight"]) for s in STRATEGIES) or 1.0
     portfolio_pnl = sum(float(s["weight"]) * strategy_pnl[s["strategy_id"]] for s in STRATEGIES) / total_weight
+    portfolio_dollar_pnl = portfolio_pnl * INITIAL_CAPITAL_USD
     today = str(now.date())
     if state.get("daily_date") != today:
         state["daily_date"] = today
         state["daily_anchor_pnl"] = portfolio_pnl
         state["last_daily_summary"] = None
     daily_pnl = portfolio_pnl - float(state.get("daily_anchor_pnl", portfolio_pnl))
+    daily_dollar_pnl = daily_pnl * INITIAL_CAPITAL_USD
 
     if events:
         lines = ["[AQS100 Portfolio 訊號]", f"已完成 K 線：{latest_bar}"]
         for event in events:
-            lines.append(f"{event['action']}｜{event['target']}｜參考價格 {event['price']:.4f}｜{event['strategy_id']}")
-        lines.append(f"目前 Portfolio 累積損益：{pct(portfolio_pnl)}")
-        lines.append(f"今日 Portfolio 損益：{pct(daily_pnl)}")
+            lines.append(f"{event['action']}｜{event['target']}｜參考價格 ${event['price']:.4f}｜參考股數 {event['shares']}｜{event['strategy_id']}")
+        lines.append(f"Initial Capital：${INITIAL_CAPITAL_USD:,.2f}")
+        lines.append(f"目前 Portfolio 累積損益：{pct(portfolio_pnl)}（${portfolio_dollar_pnl:+,.2f}）")
+        lines.append(f"今日 Portfolio 損益：{pct(daily_pnl)}（${daily_dollar_pnl:+,.2f}）")
         lines.append("各策略累積損益：")
         for spec in STRATEGIES:
-            lines.append(f"{spec['target']}｜{pct(strategy_pnl[spec['strategy_id']])}｜{spec['strategy_id']}")
+            sid = spec["strategy_id"]
+            current_state = state["strategies"][sid]
+            lines.append(f"{spec['target']}｜{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）｜參考股數 {current_state['reference_shares']}｜{sid}")
         send_telegram("\n".join(lines))
 
     is_trading_day = now.weekday() < 5 and latest_bar is not None and latest_bar.date() == now.date()
     if is_trading_day and now.hour >= 16 and state.get("last_daily_summary") != today:
-        lines = ["[AQS100 每日 Portfolio 摘要]", f"日期：{today}", f"Portfolio 累積損益：{pct(portfolio_pnl)}", f"今日損益：{pct(daily_pnl)}"]
+        lines = ["[AQS100 每日 Portfolio 摘要]", f"日期：{today}", f"Initial Capital：${INITIAL_CAPITAL_USD:,.2f}", f"Portfolio 累積損益：{pct(portfolio_pnl)}（${portfolio_dollar_pnl:+,.2f}）", f"今日損益：{pct(daily_pnl)}（${daily_dollar_pnl:+,.2f}）"]
         for spec in STRATEGIES:
-            lines.append(f"{spec['target']}｜{pct(strategy_pnl[spec['strategy_id']])}｜{spec['strategy_id']}")
+            sid = spec["strategy_id"]
+            lines.append(f"{spec['target']}｜{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）｜參考股數 {state['strategies'][sid]['reference_shares']}｜{sid}")
         send_telegram("\n".join(lines))
         state["last_daily_summary"] = today
 
     state["last_bar"] = str(latest_bar)
     state["started"] = True
     save_state(state)
-    print(json.dumps({"status": "OK", "bar": str(latest_bar), "events": events, "portfolio_cumulative_pnl": portfolio_pnl, "portfolio_daily_pnl": daily_pnl}, ensure_ascii=False))
+    print(json.dumps({"status": "OK", "bar": str(latest_bar), "events": events, "initial_capital_usd": INITIAL_CAPITAL_USD, "portfolio_cumulative_pnl": portfolio_pnl, "portfolio_cumulative_pnl_usd": portfolio_dollar_pnl, "portfolio_daily_pnl": daily_pnl, "portfolio_daily_pnl_usd": daily_dollar_pnl}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
