@@ -1,0 +1,16 @@
+{
+  "interval": "1h",
+  "feed": "iex",
+  "adjustment": "all",
+  "regular_trading_hours_only": true,
+  "vix_proxy": "VIXY",
+  "strategies": [
+    {"strategy_id":"KO|XLY_close|robust_scaler|trend_reverse_long|L80|T1.35","target":"KO","feature":"XLY_close","model":"robust_scaler","strategy":"trend_reverse_long","length":80,"entry_threshold":1.35,"exit_threshold":0.0,"weight":0.14285714285714285},
+    {"strategy_id":"HWKN|VIX_close|min_max|trend_long|L50|T0.8500000000000016","target":"HWKN","feature":"VIX_close","model":"min_max","strategy":"trend_long","length":50,"entry_threshold":0.8500000000000016,"exit_threshold":0.0,"weight":0.14285714285714285},
+    {"strategy_id":"CRWD|VIX_returns|min_max|trend_long|L60|T0.9500000000000017","target":"CRWD","feature":"VIX_returns","model":"min_max","strategy":"trend_long","length":60,"entry_threshold":0.9500000000000017,"exit_threshold":0.0,"weight":0.14285714285714285},
+    {"strategy_id":"CRWD|CRWD_XLK_spread|rsi|trend_reverse_long|L39|T35.0","target":"CRWD","feature":"CRWD_XLK_spread","model":"rsi","strategy":"trend_reverse_long","length":39,"entry_threshold":35.0,"exit_threshold":0.0,"weight":0.14285714285714285},
+    {"strategy_id":"CRWD|XLK_returns|zscore|trend_reverse_long|L180|T-1.5","target":"CRWD","feature":"XLK_returns","model":"zscore","strategy":"trend_reverse_long","length":180,"entry_threshold":-1.5,"exit_threshold":0.0,"weight":0.14285714285714285},
+    {"strategy_id":"CRWD|CRWD_XLK_spread|rsi|trend_reverse_long|L37|T35.0","target":"CRWD","feature":"CRWD_XLK_spread","model":"rsi","strategy":"trend_reverse_long","length":37,"entry_threshold":35.0,"exit_threshold":0.0,"weight":0.14285714285714285},
+    {"strategy_id":"CRWD|CRWD_QQQ_spread|zscore|trend_reverse_long|L40|T-0.75","target":"CRWD","feature":"CRWD_QQQ_spread","model":"zscore","strategy":"trend_reverse_long","length":40,"entry_threshold":-0.75,"exit_threshold":0.0,"weight":0.14285714285714285}
+  ]
+}
