@@ -153,6 +153,9 @@ def pct(value):
 
 def main():
     now = pd.Timestamp.now(tz="America/New_York")
+    if os.environ.get("TELEGRAM_TEST", "false").strip().lower() == "true":
+        send_telegram("[AQS100 Telegram 測試成功]\\n時間：" + str(now) + "\\n這只是通知連線測試，不會下單。")
+        print("TELEGRAM_TEST_SENT")
     # Alpaca bar 的時間標籤是該根 K 線的開始時間；因此只取已經完整結束的 bar。
     end = now.floor("h") - pd.Timedelta(hours=1) if INTERVAL != "1d" else now.normalize()
     # 1h 最長 rolling length 是 180，20 天不夠，使用 120 天保留安全暖身區。
