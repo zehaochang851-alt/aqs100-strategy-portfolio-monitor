@@ -4,6 +4,9 @@
   "adjustment": "all",
   "regular_trading_hours_only": true,
   "vix_proxy": "VIXY",
+  "initial_capital_usd": 10000.0,
+  "position_sizing": "equal_weight_per_strategy",
+  "share_rounding": "floor_whole_shares",
   "strategies": [
     {"strategy_id":"KO|XLY_close|robust_scaler|trend_reverse_long|L80|T1.35","target":"KO","feature":"XLY_close","model":"robust_scaler","strategy":"trend_reverse_long","length":80,"entry_threshold":1.35,"exit_threshold":0.0,"weight":0.14285714285714285},
     {"strategy_id":"HWKN|VIX_close|min_max|trend_long|L50|T0.8500000000000016","target":"HWKN","feature":"VIX_close","model":"min_max","strategy":"trend_long","length":50,"entry_threshold":0.8500000000000016,"exit_threshold":0.0,"weight":0.14285714285714285},
