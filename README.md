@@ -1,4 +1,4 @@
-[AQS100 Alpaca → Telegram 監控.md](https://github.com/user-attachments/files/31637880/AQS100.Alpaca.Telegram.md)
+[AQS100 Alpaca → Telegram 監控.md](https://github.com/user-attachments/files/31638579/AQS100.Alpaca.Telegram.md)
 # AQS100 Alpaca → Telegram 監控
 
 這個小程式只做一件事：定期讀取 Alpaca 最新行情，按照已完成回測的策略檢查進場和出場訊號，然後把訊號、參考價格和 Portfolio 損益傳到 Telegram。它不會下單，不會連接 IBKR，也沒有 Paper 或 Live Trading 功能。
@@ -34,6 +34,8 @@
 
 ## 執行方式
 
-Workflow 可以在 GitHub Actions 頁面手動按 Run workflow 測試。正常輸出會顯示 `status=OK`；沒有新訊號時不會傳 Telegram。程式會把 `state.json` 提交回 repository，用來記住上一根已處理 K 線、各策略目前訊號和累積損益，避免重複通知。
+Workflow 可以在 GitHub Actions 頁面手動按 Run workflow 測試。手動執行時會看到 `telegram_test` 選項：選 `true` 會傳送一則 `[AQS100 Telegram 測試成功]`，用來確認四個 Secrets 和 Telegram 發送功能；日常使用及自動排程必須保持 `false`。這個測試只發通知，不會下單。
+
+正常輸出會顯示 `status=OK`；沒有新訊號時不會傳一般 Portfolio 訊息。程式會把 `state.json` 提交回 repository，用來記住上一根已處理 K 線、各策略目前訊號和累積損益，避免重複通知。
 
 這是通知與研究用途，不是投資建議，也不代表歷史回測結果會在未來重現。
