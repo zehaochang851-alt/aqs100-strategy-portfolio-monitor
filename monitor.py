@@ -70,13 +70,13 @@ def build_frame(records, targets, benchmarks):
         base = pd.concat([series_from(records[target], "o", "open"), series_from(records[target], "h", "high"), series_from(records[target], "l", "low"), series_from(records[target], "c", "close"), series_from(records[target], "v", "volume")], axis=1)
         base.columns = ["open", "high", "low", "close", "volume"]
         base[f"{target}_close"] = base["close"]
-        base[f"{target}_returns"] = base["close"].pct_change()
+        base[f"{target}_returns"] = base["close"].pct_change(fill_method=None)
         base["VIX_close"] = series_from(records[VIX_TICKER], "c", VIX_TICKER)
-        base["VIX_returns"] = base["VIX_close"].pct_change()
+        base["VIX_returns"] = base["VIX_close"].pct_change(fill_method=None)
         for benchmark in benchmarks[target]:
             close = series_from(records[benchmark], "c", benchmark)
             base[f"{benchmark}_close"] = close
-            base[f"{benchmark}_returns"] = close.pct_change()
+            base[f"{benchmark}_returns"] = close.pct_change(fill_method=None)
             base[f"{target}_{benchmark}_spread"] = base[f"{target}_close"] - close
         if CONFIG.get("regular_trading_hours_only", True) and INTERVAL != "1d":
             base = base[(base.index.strftime("%H:%M") >= "09:30") & (base.index.strftime("%H:%M") <= "16:00")]
@@ -162,6 +162,8 @@ def main():
         feature = s["feature"]
         if feature.endswith("_returns") and feature not in (f"{s['target']}_returns", "VIX_returns"):
             benchmark_map[s["target"]].append(feature[:-8])
+        elif feature.endswith("_close") and feature not in (f"{s['target']}_close", "VIX_close"):
+            benchmark_map[s["target"]].append(feature[:-6])
         elif feature.startswith(s["target"] + "_") and feature.endswith("_spread"):
             benchmark_map[s["target"]].append(feature[len(s["target"]) + 1:-7])
     for target in benchmark_map:
@@ -188,7 +190,7 @@ def main():
             raise RuntimeError(f"{target} 資料不足以計算 length={spec['length']}")
         score = model_score(frame, spec["feature"], spec["model"], int(spec["length"]))
         signal = signal_from_score(score, spec["strategy"], float(spec["entry_threshold"]), float(spec.get("exit_threshold", 0.0)))
-        ret = frame["close"].pct_change().fillna(0.0).to_numpy(dtype=float)
+        ret = frame["close"].pct_change(fill_method=None).fillna(0.0).to_numpy(dtype=float)
         bar_time = frame.index[-1]
         latest_bar = max(latest_bar, bar_time) if latest_bar is not None else bar_time
         old = state["strategies"].get(spec["strategy_id"], {})
