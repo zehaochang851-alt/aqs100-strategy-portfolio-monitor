@@ -36,6 +36,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_TEST: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
+          TELEGRAM_PREVIEW: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: python monitor.py
 
       - name: Save notification state
