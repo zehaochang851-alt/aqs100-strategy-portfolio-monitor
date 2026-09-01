@@ -68,5 +68,6 @@
   "last_daily_summary": "2026-08-31",
   "started": true,
   "daily_date": "2026-08-31",
-  "daily_anchor_pnl": 0.0
+  "daily_anchor_pnl": 0.0,
+  "telegram_chat_id": "7055440007"
 }
