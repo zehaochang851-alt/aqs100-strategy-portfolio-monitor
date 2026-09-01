@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: aqs100-telegram-monitor
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   monitor:
@@ -47,5 +47,12 @@ jobs:
             echo "No state change"
           else
             git commit -m "Update AQS100 monitor state"
-            git push
+            if git push; then
+              echo "State saved"
+            else
+              echo "Remote state is newer; synchronize without overwriting it"
+              git fetch origin main
+              git reset --hard origin/main
+              echo "Remote state kept; next scheduled run will continue from it"
+            fi
           fi
