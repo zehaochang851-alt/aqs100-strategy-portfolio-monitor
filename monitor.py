@@ -286,26 +286,51 @@ def main():
     daily_pnl = portfolio_pnl - float(state.get("daily_anchor_pnl", portfolio_pnl))
     daily_dollar_pnl = daily_pnl * INITIAL_CAPITAL_USD
 
-    if events:
-        lines = ["[AQS100 Portfolio 訊號]", f"已完成 K 線：{latest_bar}"]
-        for event in events:
-            lines.append(f"{event['action']}｜{event['target']}｜參考價格 ${event['price']:.4f}｜參考股數 {event['shares']}｜{event['strategy_id']}")
-        lines.append(f"Initial Capital：${INITIAL_CAPITAL_USD:,.2f}")
-        lines.append(f"目前 Portfolio 累積損益：{pct(portfolio_pnl)}（${portfolio_dollar_pnl:+,.2f}）")
-        lines.append(f"今日 Portfolio 損益：{pct(daily_pnl)}（${daily_dollar_pnl:+,.2f}）")
-        lines.append("各策略累積損益：")
+    spec_by_id = {spec["strategy_id"]: spec for spec in STRATEGIES}
+
+    def strategy_label(spec):
+        return f"{spec['model']} / {spec['strategy']} / L{spec['length']} / T{spec['entry_threshold']}"
+
+    def append_portfolio_status(lines):
+        lines.extend([
+            "",
+            "【Portfolio 狀態】",
+            f"起始資金       ：${INITIAL_CAPITAL_USD:,.2f}",
+            f"累積損益       ：{pct(portfolio_pnl)}（${portfolio_dollar_pnl:+,.2f}）",
+            f"今日損益       ：{pct(daily_pnl)}（${daily_dollar_pnl:+,.2f}）",
+            "",
+            "【各策略狀態】",
+        ])
         for spec in STRATEGIES:
             sid = spec["strategy_id"]
             current_state = state["strategies"][sid]
-            lines.append(f"{spec['target']}｜{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）｜參考股數 {current_state['reference_shares']}｜{sid}")
+            lines.extend([
+                f"{spec['target']}｜{spec['strategy']}｜{spec['model']}",
+                f"  損益：{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）｜參考股數：{current_state['reference_shares']} 股",
+            ])
+
+    if events:
+        lines = ["【AQS100 訊號通知】", "==================="]
+        for event in events:
+            spec = spec_by_id.get(event["strategy_id"], {})
+            lines.extend([
+                "",
+                f"動作         ：{event['action']}",
+                f"股票         ：{event['target']}",
+                f"策略         ：{strategy_label(spec) if spec else event['strategy_id']}",
+                f"時間         ：{event['bar_time']}",
+                f"訊號價格     ：${event['price']:,.4f}",
+                f"參考股數     ：{event['shares']} 股",
+                f"策略配置資金 ：${event['allocated_capital']:,.2f}",
+            ])
+        lines.extend(["", f"Completed bar: {latest_bar}"])
+        append_portfolio_status(lines)
         send_telegram("\n".join(lines), chat_id=telegram_chat_id)
 
     is_trading_day = now.weekday() < 5 and latest_bar is not None and latest_bar.date() == now.date()
     if is_trading_day and now.hour >= 16 and state.get("last_daily_summary") != today:
-        lines = ["[AQS100 每日 Portfolio 摘要]", f"日期：{today}", f"Initial Capital：${INITIAL_CAPITAL_USD:,.2f}", f"Portfolio 累積損益：{pct(portfolio_pnl)}（${portfolio_dollar_pnl:+,.2f}）", f"今日損益：{pct(daily_pnl)}（${daily_dollar_pnl:+,.2f}）"]
-        for spec in STRATEGIES:
-            sid = spec["strategy_id"]
-            lines.append(f"{spec['target']}｜{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）｜參考股數 {state['strategies'][sid]['reference_shares']}｜{sid}")
+        lines = ["【AQS100 每日 Portfolio 摘要】", "==============================", f"日期           ：{today}"]
+        append_portfolio_status(lines)
         send_telegram("\n".join(lines), chat_id=telegram_chat_id)
         state["last_daily_summary"] = today
 
