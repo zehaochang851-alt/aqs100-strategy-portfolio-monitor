@@ -144,7 +144,12 @@ def send_telegram(text):
     chat_id = env_required("TELEGRAM_CHAT_ID")
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     response = requests.post(url, json={"chat_id": chat_id, "text": text}, timeout=30)
-    response.raise_for_status()
+    if not response.ok:
+        try:
+            detail = response.json().get("description", response.text)
+        except Exception:
+            detail = response.text
+        raise RuntimeError(f"Telegram API 發送失敗：HTTP {response.status_code}；{detail}")
 
 
 def pct(value):
