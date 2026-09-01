@@ -139,9 +139,31 @@ def save_state(state):
     temp.replace(STATE_PATH)
 
 
-def send_telegram(text):
+def discover_private_chat_id():
     token = env_required("TELEGRAM_BOT_TOKEN")
-    chat_id = env_required("TELEGRAM_CHAT_ID")
+    url = f"https://api.telegram.org/bot{token}/getUpdates"
+    response = requests.get(url, timeout=30)
+    if not response.ok:
+        try:
+            detail = response.json().get("description", response.text)
+        except Exception:
+            detail = response.text
+        raise RuntimeError(f"Telegram API 讀取更新失敗：HTTP {response.status_code}；{detail}")
+    payload = response.json() or {}
+    for update in reversed(payload.get("result", []) or []):
+        message = update.get("message") or update.get("edited_message")
+        if not message:
+            continue
+        sender = message.get("from") or {}
+        chat = message.get("chat") or {}
+        if chat.get("type") == "private" and sender.get("is_bot") is not True and chat.get("id") is not None:
+            return str(chat["id"])
+    raise RuntimeError("找不到私人聊天 Chat ID。請先在新的 AQS100 Bot 私人聊天傳送 /start，再重新手動執行 workflow。")
+
+
+def send_telegram(text, chat_id=None):
+    token = env_required("TELEGRAM_BOT_TOKEN")
+    chat_id = str(chat_id or env_required("TELEGRAM_CHAT_ID"))
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     response = requests.post(url, json={"chat_id": chat_id, "text": text}, timeout=30)
     if not response.ok:
@@ -158,9 +180,16 @@ def pct(value):
 
 def main():
     now = pd.Timestamp.now(tz="America/New_York")
-    if os.environ.get("TELEGRAM_TEST", "false").strip().lower() == "true":
-        send_telegram("[AQS100 Telegram 測試成功]\\n時間：" + str(now) + "\\n這只是通知連線測試，不會下單。")
+    state = load_state()
+    manual_test = os.environ.get("TELEGRAM_TEST", "false").strip().lower() == "true"
+    if manual_test:
+        telegram_chat_id = discover_private_chat_id()
+        state["telegram_chat_id"] = telegram_chat_id
+        send_telegram("[AQS100 Telegram 測試成功]\\n時間：" + str(now) + "\\n這只是通知連線測試，不會下單。", chat_id=telegram_chat_id)
+        print("TELEGRAM_CHAT_ID_DISCOVERED")
         print("TELEGRAM_TEST_SENT")
+    else:
+        telegram_chat_id = str(state.get("telegram_chat_id") or env_required("TELEGRAM_CHAT_ID"))
     # Alpaca bar 的時間標籤是該根 K 線的開始時間；因此只取已經完整結束的 bar。
     end = now.floor("h") - pd.Timedelta(hours=1) if INTERVAL != "1d" else now.normalize()
     # 1h 最長 rolling length 是 180，20 天不夠，使用 120 天保留安全暖身區。
@@ -181,7 +210,6 @@ def main():
     records = fetch_bars(symbols, start, end)
     frames = {target: frame for target, frame in zip(targets, build_frame(records, targets, benchmark_map))}
 
-    state = load_state()
     state.setdefault("strategies", {})
     state.setdefault("started", False)
     state.setdefault("last_daily_summary", None)
@@ -270,7 +298,7 @@ def main():
             sid = spec["strategy_id"]
             current_state = state["strategies"][sid]
             lines.append(f"{spec['target']}｜{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）｜參考股數 {current_state['reference_shares']}｜{sid}")
-        send_telegram("\n".join(lines))
+        send_telegram("\n".join(lines), chat_id=telegram_chat_id)
 
     is_trading_day = now.weekday() < 5 and latest_bar is not None and latest_bar.date() == now.date()
     if is_trading_day and now.hour >= 16 and state.get("last_daily_summary") != today:
@@ -278,7 +306,7 @@ def main():
         for spec in STRATEGIES:
             sid = spec["strategy_id"]
             lines.append(f"{spec['target']}｜{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）｜參考股數 {state['strategies'][sid]['reference_shares']}｜{sid}")
-        send_telegram("\n".join(lines))
+        send_telegram("\n".join(lines), chat_id=telegram_chat_id)
         state["last_daily_summary"] = today
 
     state["last_bar"] = str(latest_bar)
