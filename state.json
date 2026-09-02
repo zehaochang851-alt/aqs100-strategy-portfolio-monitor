@@ -5,6 +5,8 @@
       "last_bar": "2026-09-01 15:00:00",
       "last_price": 88.01,
       "reference_shares": 15,
+      "entry_price": null,
+      "position_value": 1320.15,
       "allocated_capital": 1428.5714285714287,
       "cumulative_pnl": -0.01832382504241914,
       "dollar_pnl": -26.17689291774163
@@ -14,6 +16,8 @@
       "last_bar": "2026-09-01 14:00:00",
       "last_price": 121.08,
       "reference_shares": 0,
+      "entry_price": null,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
       "cumulative_pnl": 0.0,
       "dollar_pnl": 0.0
@@ -23,6 +27,8 @@
       "last_bar": "2026-09-01 15:00:00",
       "last_price": 215.065,
       "reference_shares": 6,
+      "entry_price": null,
+      "position_value": 1290.3899999999999,
       "allocated_capital": 1428.5714285714287,
       "cumulative_pnl": 0.003678454670506027,
       "dollar_pnl": 5.2549352435800385
@@ -32,6 +38,8 @@
       "last_bar": "2026-09-01 15:00:00",
       "last_price": 215.065,
       "reference_shares": 0,
+      "entry_price": null,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
       "cumulative_pnl": 0.0,
       "dollar_pnl": 0.0
@@ -41,6 +49,8 @@
       "last_bar": "2026-09-01 15:00:00",
       "last_price": 215.065,
       "reference_shares": 0,
+      "entry_price": null,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
       "cumulative_pnl": 0.03638277433915764,
       "dollar_pnl": 51.97539191308235
@@ -50,6 +60,8 @@
       "last_bar": "2026-09-01 15:00:00",
       "last_price": 215.065,
       "reference_shares": 0,
+      "entry_price": null,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
       "cumulative_pnl": 0.0,
       "dollar_pnl": 0.0
@@ -59,6 +71,8 @@
       "last_bar": "2026-09-01 15:00:00",
       "last_price": 215.065,
       "reference_shares": 0,
+      "entry_price": null,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
       "cumulative_pnl": 0.0,
       "dollar_pnl": 0.0
