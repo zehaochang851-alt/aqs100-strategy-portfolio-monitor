@@ -1,6 +1,7 @@
 import json
 import math
 import os
+from html import escape
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -165,7 +166,7 @@ def send_telegram(text, chat_id=None):
     token = env_required("TELEGRAM_BOT_TOKEN")
     chat_id = str(chat_id or env_required("TELEGRAM_CHAT_ID"))
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    response = requests.post(url, json={"chat_id": chat_id, "text": text}, timeout=30)
+    response = requests.post(url, json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"}, timeout=30)
     if not response.ok:
         try:
             detail = response.json().get("description", response.text)
@@ -178,50 +179,87 @@ def pct(value):
     return f"{value * 100:+.2f}%"
 
 
+def pnl_line(value, dollars):
+    icon = "🟢" if dollars >= 0 else "🔴"
+    return f"{icon} ${dollars:+,.2f} ({pct(value)})"
+
+
 def send_telegram_preview(chat_id):
-    signal_preview = """【AQS100 訊號通知】
-===================
+    signal_preview = """🔔 <b>AQS100｜新訊號</b>
+🟢 <b>ENTRY｜CRWD</b>
+📅 2026-09-01　🕐 13:00
 
-動作         ：ENTRY
-股票         ：KO
-策略         ：robust_scaler / trend_reverse_long / L80 / T1.35
-時間         ：2026-09-01 10:00:00
-訊號價格     ：$90.1200
-參考股數     ：15 股
-策略配置資金 ：$1,428.57
+━━━━━━━━━━━━━━
+🎯 <b>這次訊號</b>
+━━━━━━━━━━━━━━
 
-【Portfolio 狀態】
-起始資金       ：$10,000.00
-累積損益       ：+1.25%（$+125.00）
-今日損益       ：+0.30%（$+30.00）
+訊號價格　<b>$214.15</b>
+參考股數　<b>6 股</b>
 
-【各策略狀態】
-KO｜trend_reverse_long｜robust_scaler
-  損益：+1.10%（$+15.71）｜參考股數：15 股
-HWKN｜trend_long｜min_max
-  損益：+0.85%（$+12.14）｜參考股數：12 股
-CRWD｜trend_long｜min_max
-  損益：+0.40%（$+5.71）｜參考股數：6 股
+策略　　　<code>min_max</code>
+參數　　　<code>L60</code>
+門檻　　　<code>0.95</code>
 
-【預覽】以上是模擬訊號，沒有下單。"""
-    daily_preview = """【AQS100 每日 Portfolio 摘要】
-==============================
-日期           ：2026-09-01
+━━━━━━━━━━━━━━
+💰 <b>資金配置</b>
+━━━━━━━━━━━━━━
 
-【Portfolio 狀態】
-起始資金       ：$10,000.00
-累積損益       ：+1.25%（$+125.00）
-今日損益       ：+0.30%（$+30.00）
+策略預算　　$1,428.57
+實際持倉　　<b>$1,284.90</b>
+未使用預算　$143.67
+預算使用率　<b>89.9%</b>
 
-【各策略狀態】
-KO｜trend_reverse_long｜robust_scaler
-  損益：+1.10%（$+15.71）｜參考股數：15 股
-HWKN｜trend_long｜min_max
-  損益：+0.85%（$+12.14）｜參考股數：12 股
-CRWD｜trend_long｜min_max
-  損益：+0.40%（$+5.71）｜參考股數：6 股
+━━━━━━━━━━━━━━
+📊 <b>訊號後 Portfolio</b>
+━━━━━━━━━━━━━━
 
-【預覽】以上是模擬摘要，沒有下單。"""
+目前資金　<b>$10,026.64</b>
+累積損益　🟢 <b>+$26.64（+0.27%）</b>
+今日損益　🔴 <b>-$10.29（-0.10%）</b>
+
+<i>以上為模擬訊號，不會下單。</i>"""
+    daily_preview = """📊 <b>AQS100 每日摘要｜2026-09-01</b>
+
+━━━━━━━━━━━━━━
+💰 <b>帳戶今天怎麼樣？</b>
+━━━━━━━━━━━━━━
+
+目前總資產　<b>$10,026.64</b>
+
+今日損益　🔴 <b>-$5.88（-0.06%）</b>
+累積損益　🟢 <b>+$31.05（+0.31%）</b>
+
+💵 現金　　$7,363.75
+📈 已進場　$2,636.25（26.3%）
+
+━━━━━━━━━━━━━━
+🚀 <b>目前已進場</b>
+━━━━━━━━━━━━━━
+
+共 <b>2 檔股票</b>
+投入資金 <b>$2,636.25</b>
+
+🥤 <b>KO</b>
+目前 🔴 <b>虧損 $26.18（-1.83%）</b>
+
+策略　　　trend_reverse_long｜robust_scaler
+持有　　　15 股
+買入價　　$90.1200
+目前價　　$90.0900
+持倉市值　$1,351.35
+
+──────────────
+
+🛡️ <b>CRWD</b>
+目前 🟢 <b>獲利 $5.25（+0.37%）</b>
+
+策略　　　trend_long｜min_max
+持有　　　6 股
+買入價　　$214.1500
+目前價　　$214.1500
+持倉市值　$1,284.90
+
+<i>以上為模擬摘要，不會下單。</i>"""
     send_telegram(signal_preview, chat_id=chat_id)
     send_telegram(daily_preview, chat_id=chat_id)
 
@@ -290,6 +328,7 @@ def main():
         cumulative = float(old.get("cumulative_pnl", 0.0))
         allocated_capital = INITIAL_CAPITAL_USD * float(spec.get("weight", 0.0)) / total_weight
         current_shares = int(old.get("reference_shares", 0))
+        entry_price = old.get("entry_price")
         last_bar_text = old.get("last_bar")
         previous_pos = None
         if last_bar_text:
@@ -312,24 +351,31 @@ def main():
                     if is_entry:
                         event_shares = int(math.floor(allocated_capital / event_price)) if event_price > 0 else 0
                         current_shares = event_shares
+                        entry_price = event_price
                     else:
                         event_shares = current_shares
+                        exit_entry_price = entry_price
                         current_shares = 0
-                    events.append({"target": target, "action": "ENTRY" if is_entry else "EXIT", "price": event_price, "shares": event_shares, "allocated_capital": allocated_capital, "bar_time": str(frame.index[j]), "strategy_id": spec["strategy_id"], "signal": float(signal[j])})
+                        entry_price = None
+                    events.append({"target": target, "action": "ENTRY" if is_entry else "EXIT", "price": event_price, "entry_price": event_price if is_entry else exit_entry_price, "shares": event_shares, "allocated_capital": allocated_capital, "bar_time": str(frame.index[j]), "strategy_id": spec["strategy_id"], "signal": float(signal[j])})
         current = float(signal[-1])
         close = float(frame["close"].iloc[-1])
         if current != 0.0 and current_shares <= 0:
             current_shares = int(math.floor(allocated_capital / close)) if close > 0 else 0
         if current == 0.0:
             current_shares = 0
+            entry_price = None
         strategy_pnl[spec["strategy_id"]] = cumulative
         strategy_dollar_pnl[spec["strategy_id"]] = cumulative * allocated_capital
         strategy_allocations[spec["strategy_id"]] = allocated_capital
-        state["strategies"][spec["strategy_id"]] = {"signal": current, "last_bar": str(bar_time), "last_price": close, "reference_shares": current_shares, "allocated_capital": allocated_capital, "cumulative_pnl": cumulative, "dollar_pnl": cumulative * allocated_capital}
+        state["strategies"][spec["strategy_id"]] = {"signal": current, "last_bar": str(bar_time), "last_price": close, "reference_shares": current_shares, "entry_price": entry_price, "position_value": current_shares * close, "allocated_capital": allocated_capital, "cumulative_pnl": cumulative, "dollar_pnl": cumulative * allocated_capital}
 
     total_weight = sum(float(s["weight"]) for s in STRATEGIES) or 1.0
     portfolio_pnl = sum(float(s["weight"]) * strategy_pnl[s["strategy_id"]] for s in STRATEGIES) / total_weight
     portfolio_dollar_pnl = portfolio_pnl * INITIAL_CAPITAL_USD
+    current_portfolio_value = INITIAL_CAPITAL_USD + portfolio_dollar_pnl
+    invested_value = sum(float(state["strategies"][s["strategy_id"]].get("position_value", 0.0)) for s in STRATEGIES)
+    uninvested_cash = INITIAL_CAPITAL_USD - invested_value
     today = str(now.date())
     if state.get("daily_date") != today:
         state["daily_date"] = today
@@ -340,48 +386,86 @@ def main():
 
     spec_by_id = {spec["strategy_id"]: spec for spec in STRATEGIES}
 
-    def strategy_label(spec):
-        return f"{spec['model']} / {spec['strategy']} / L{spec['length']} / T{spec['entry_threshold']}"
+    def format_number(value):
+        return f"{float(value):g}"
 
-    def append_portfolio_status(lines):
+    def strategy_label(spec):
+        return f"{spec['model']} / {spec['strategy']} / L{spec['length']} / T{format_number(spec['entry_threshold'])}"
+
+    active_ids = {event["strategy_id"] for event in events}
+    active_ids.update(sid for sid, item in state["strategies"].items() if float(item.get("signal", 0.0)) != 0.0)
+
+    def append_portfolio_status(lines, include_holdings=True):
         lines.extend([
             "",
             "【Portfolio 狀態】",
             f"起始資金       ：${INITIAL_CAPITAL_USD:,.2f}",
+            f"目前資金       ：${current_portfolio_value:,.2f}",
+            f"已投入市值     ：${invested_value:,.2f}",
+            f"未使用現金     ：${uninvested_cash:,.2f}",
             f"累積損益       ：{pct(portfolio_pnl)}（${portfolio_dollar_pnl:+,.2f}）",
             f"今日損益       ：{pct(daily_pnl)}（${daily_dollar_pnl:+,.2f}）",
-            "",
-            "【各策略狀態】",
         ])
+        if not include_holdings:
+            return
+        lines.extend(["", "【目前持有策略】"])
         for spec in STRATEGIES:
             sid = spec["strategy_id"]
+            if sid not in active_ids:
+                continue
             current_state = state["strategies"][sid]
+            shares = int(current_state.get("reference_shares", 0))
+            entry = current_state.get("entry_price")
+            current_price = float(current_state.get("last_price", 0.0))
+            position_value = shares * current_price
+            status = "持有中" if shares > 0 else "剛出場"
             lines.extend([
-                f"{spec['target']}｜{spec['strategy']}｜{spec['model']}",
-                f"  損益：{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）｜參考股數：{current_state['reference_shares']} 股",
+                f"{spec['target']}｜{status}｜{spec['strategy']}｜{spec['model']}",
+                f"  進場價格：${float(entry):,.4f}" if entry is not None else "  進場價格：—（剛出場或尚未持有）",
+                f"  目前價格：${current_price:,.4f}｜參考股數：{shares} 股",
+                f"  持倉市值：${position_value:,.2f}｜策略損益：{pct(strategy_pnl[sid])}（${strategy_dollar_pnl[sid]:+,.2f}）",
             ])
 
     if events:
-        lines = ["【AQS100 訊號通知】", "==================="]
+        lines = ["🔔 <b>AQS100｜新訊號</b>"]
         for event in events:
             spec = spec_by_id.get(event["strategy_id"], {})
+            action_icon = "🟢" if event["action"] == "ENTRY" else "🔴"
+            actual_value = event["shares"] * event["price"]
+            unused_budget = max(event["allocated_capital"] - actual_value, 0.0)
+            usage = actual_value / event["allocated_capital"] * 100 if event["allocated_capital"] else 0.0
             lines.extend([
                 "",
-                f"動作         ：{event['action']}",
-                f"股票         ：{event['target']}",
-                f"策略         ：{strategy_label(spec) if spec else event['strategy_id']}",
-                f"時間         ：{event['bar_time']}",
-                f"訊號價格     ：${event['price']:,.4f}",
-                f"參考股數     ：{event['shares']} 股",
-                f"策略配置資金 ：${event['allocated_capital']:,.2f}",
+                f"{action_icon} <b>{event['action']}｜{escape(str(event['target']))}</b>",
+                f"📅 {escape(str(event['bar_time']))}",
+                "",
+                "━━━━━━━━━━━━━━",
+                "🎯 <b>這次訊號</b>",
+                "━━━━━━━━━━━━━━",
+                "",
+                f"訊號價格　<b>${event['price']:,.2f}</b>",
+                f"進場價格　<b>${event['entry_price']:,.2f}</b>" if event.get('entry_price') is not None else "進場價格　—",
+                f"參考股數　<b>{event['shares']} 股</b>",
+                f"策略　　　<code>{escape(str(spec.get('model', '')))}</code>",
+                f"參數　　　<code>L{spec.get('length', '')}</code>",
+                f"門檻　　　<code>{format_number(spec.get('entry_threshold', 0))}</code>",
+                "",
+                "━━━━━━━━━━━━━━",
+                "💰 <b>資金配置</b>",
+                "━━━━━━━━━━━━━━",
+                "",
+                f"策略預算　　${event['allocated_capital']:,.2f}",
+                f"實際持倉　　<b>${actual_value:,.2f}</b>",
+                f"未使用預算　${unused_budget:,.2f}",
+                f"預算使用率　<b>{usage:.1f}%</b>",
             ])
-        lines.extend(["", f"Completed bar: {latest_bar}"])
-        append_portfolio_status(lines)
+        lines.extend(["", "━━━━━━━━━━━━━━", "📊 <b>訊號後 Portfolio</b>", "━━━━━━━━━━━━━━"])
+        append_portfolio_status(lines, include_holdings=False)
         send_telegram("\n".join(lines), chat_id=telegram_chat_id)
 
     is_trading_day = now.weekday() < 5 and latest_bar is not None and latest_bar.date() == now.date()
     if is_trading_day and now.hour >= 16 and state.get("last_daily_summary") != today:
-        lines = ["【AQS100 每日 Portfolio 摘要】", "==============================", f"日期           ：{today}"]
+        lines = [f"📊 <b>AQS100 每日摘要｜{today}</b>", "", "━━━━━━━━━━━━━━", "💰 <b>帳戶今天怎麼樣？</b>", "━━━━━━━━━━━━━━"]
         append_portfolio_status(lines)
         send_telegram("\n".join(lines), chat_id=telegram_chat_id)
         state["last_daily_summary"] = today
