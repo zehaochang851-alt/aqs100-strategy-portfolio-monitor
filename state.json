@@ -3,10 +3,10 @@
     "KO|XLY_close|robust_scaler|trend_reverse_long|L80|T1.35": {
       "signal": 1.0,
       "last_bar": "2026-09-14 15:00:00",
-      "last_price": 89.365,
+      "last_price": 88.83,
       "reference_shares": 15,
       "entry_price": null,
-      "position_value": 1340.475,
+      "position_value": 1332.45,
       "allocated_capital": 1428.5714285714287,
       "cumulative_pnl": -0.0028473709800470592,
       "dollar_pnl": -4.067672828638656
@@ -79,9 +79,9 @@
     }
   },
   "last_bar": "2026-09-14 15:00:00",
-  "last_daily_summary": "2026-09-14",
+  "last_daily_summary": null,
   "started": true,
-  "daily_date": "2026-09-14",
-  "daily_anchor_pnl": 0.003552313626405137,
+  "daily_date": "2026-09-15",
+  "daily_anchor_pnl": 0.026294877676072338,
   "telegram_chat_id": "7055440007"
 }
