@@ -79,9 +79,9 @@
     }
   },
   "last_bar": "2026-09-28 15:00:00",
-  "last_daily_summary": "2026-09-28",
+  "last_daily_summary": null,
   "started": true,
-  "daily_date": "2026-09-28",
-  "daily_anchor_pnl": 0.04016848201612048,
+  "daily_date": "2026-09-29",
+  "daily_anchor_pnl": 0.04288443594065223,
   "telegram_chat_id": "7055440007"
 }
