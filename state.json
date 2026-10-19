@@ -1,15 +1,15 @@
 {
   "strategies": {
     "KO|XLY_close|robust_scaler|trend_reverse_long|L80|T1.35": {
-      "signal": 1.0,
-      "last_bar": "2026-10-16 15:00:00",
-      "last_price": 93.86,
-      "reference_shares": 15,
+      "signal": 0.0,
+      "last_bar": "2026-10-19 13:00:00",
+      "last_price": 93.845,
+      "reference_shares": 0,
       "entry_price": null,
-      "position_value": 1407.9,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": 0.0533756367955448,
-      "dollar_pnl": 76.25090970792115
+      "cumulative_pnl": 0.048615459294816074,
+      "dollar_pnl": 69.45065613545154
     },
     "HWKN|VIX_close|min_max|trend_long|L50|T0.8500000000000016": {
       "signal": 1.0,
@@ -23,62 +23,62 @@
       "dollar_pnl": 93.60767659338815
     },
     "CRWD|VIX_returns|min_max|trend_long|L60|T0.9500000000000017": {
-      "signal": 1.0,
-      "last_bar": "2026-10-16 15:00:00",
-      "last_price": 227.3,
-      "reference_shares": 6,
-      "entry_price": 227.71,
-      "position_value": 1363.8000000000002,
+      "signal": 0.0,
+      "last_bar": "2026-10-19 13:00:00",
+      "last_price": 229.23,
+      "reference_shares": 0,
+      "entry_price": null,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": -0.04542772497683244,
-      "dollar_pnl": -64.89674996690349
+      "cumulative_pnl": -0.03507303953908508,
+      "dollar_pnl": -50.104342198692976
     },
     "CRWD|CRWD_XLK_spread|rsi|trend_reverse_long|L39|T35.0": {
       "signal": 1.0,
-      "last_bar": "2026-10-16 15:00:00",
-      "last_price": 227.3,
+      "last_bar": "2026-10-19 13:00:00",
+      "last_price": 229.23,
       "reference_shares": 6,
       "entry_price": 226.825,
-      "position_value": 1363.8000000000002,
+      "position_value": 1375.3799999999999,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": 0.005268847403390713,
-      "dollar_pnl": 7.526924861986734
+      "cumulative_pnl": 0.01381964738497386,
+      "dollar_pnl": 19.742353407105515
     },
     "CRWD|XLK_returns|zscore|trend_reverse_long|L180|T-1.5": {
       "signal": 1.0,
-      "last_bar": "2026-10-16 15:00:00",
-      "last_price": 227.3,
+      "last_bar": "2026-10-19 13:00:00",
+      "last_price": 229.23,
       "reference_shares": 6,
-      "entry_price": 227.71,
-      "position_value": 1363.8000000000002,
+      "entry_price": 229.23,
+      "position_value": 1375.3799999999999,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": 0.044274728923965334,
-      "dollar_pnl": 63.24961274852191
+      "cumulative_pnl": 0.054029414361712685,
+      "dollar_pnl": 77.18487765958956
     },
     "CRWD|CRWD_XLK_spread|rsi|trend_reverse_long|L37|T35.0": {
       "signal": 1.0,
-      "last_bar": "2026-10-16 15:00:00",
-      "last_price": 227.3,
+      "last_bar": "2026-10-19 13:00:00",
+      "last_price": 229.23,
       "reference_shares": 6,
       "entry_price": 227.71,
-      "position_value": 1363.8000000000002,
+      "position_value": 1375.3799999999999,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": -0.013143639279368163,
-      "dollar_pnl": -18.776627541954518
+      "cumulative_pnl": -0.004592839297785017,
+      "dollar_pnl": -6.5611989968357385
     },
     "CRWD|CRWD_QQQ_spread|zscore|trend_reverse_long|L40|T-0.75": {
       "signal": 1.0,
-      "last_bar": "2026-10-16 15:00:00",
-      "last_price": 227.3,
+      "last_bar": "2026-10-19 13:00:00",
+      "last_price": 229.23,
       "reference_shares": 6,
       "entry_price": 225.62,
-      "position_value": 1363.8000000000002,
+      "position_value": 1375.3799999999999,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": 0.23050862466481514,
-      "dollar_pnl": 329.29803523545024
+      "cumulative_pnl": 0.2390594246463983,
+      "dollar_pnl": 341.513463780569
     }
   },
-  "last_bar": "2026-10-16 15:00:00",
+  "last_bar": "2026-10-19 13:00:00",
   "last_daily_summary": null,
   "started": true,
   "daily_date": "2026-10-19",
