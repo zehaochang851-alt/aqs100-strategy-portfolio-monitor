@@ -2,8 +2,8 @@
   "strategies": {
     "KO|XLY_close|robust_scaler|trend_reverse_long|L80|T1.35": {
       "signal": 0.0,
-      "last_bar": "2026-10-20 10:00:00",
-      "last_price": 93.265,
+      "last_bar": "2026-10-20 14:00:00",
+      "last_price": 92.865,
       "reference_shares": 0,
       "entry_price": null,
       "position_value": 0.0,
@@ -12,20 +12,20 @@
       "dollar_pnl": 69.45065613545154
     },
     "HWKN|VIX_close|min_max|trend_long|L50|T0.8500000000000016": {
-      "signal": 1.0,
-      "last_bar": "2026-10-19 15:00:00",
-      "last_price": 131.65,
-      "reference_shares": 10,
-      "entry_price": 131.66,
-      "position_value": 1316.5,
+      "signal": 0.0,
+      "last_bar": "2026-10-20 14:00:00",
+      "last_price": 132.0,
+      "reference_shares": 0,
+      "entry_price": null,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": 0.06544942040255086,
-      "dollar_pnl": 93.49917200364409
+      "cumulative_pnl": 0.07305299047471185,
+      "dollar_pnl": 104.36141496387408
     },
     "CRWD|VIX_returns|min_max|trend_long|L60|T0.9500000000000017": {
       "signal": 0.0,
-      "last_bar": "2026-10-20 10:00:00",
-      "last_price": 227.32,
+      "last_bar": "2026-10-20 14:00:00",
+      "last_price": 228.56,
       "reference_shares": 0,
       "entry_price": null,
       "position_value": 0.0,
@@ -35,50 +35,50 @@
     },
     "CRWD|CRWD_XLK_spread|rsi|trend_reverse_long|L39|T35.0": {
       "signal": 1.0,
-      "last_bar": "2026-10-20 10:00:00",
-      "last_price": 227.32,
+      "last_bar": "2026-10-20 14:00:00",
+      "last_price": 228.56,
       "reference_shares": 6,
       "entry_price": 226.825,
-      "position_value": 1363.92,
+      "position_value": 1371.3600000000001,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": 0.005464670726982739,
-      "dollar_pnl": 7.806672467118199
+      "cumulative_pnl": 0.01094984935693442,
+      "dollar_pnl": 15.642641938477745
     },
     "CRWD|XLK_returns|zscore|trend_reverse_long|L180|T-1.5": {
-      "signal": 1.0,
-      "last_bar": "2026-10-20 10:00:00",
-      "last_price": 227.32,
-      "reference_shares": 6,
-      "entry_price": 229.23,
-      "position_value": 1363.92,
+      "signal": 0.0,
+      "last_bar": "2026-10-20 14:00:00",
+      "last_price": 228.56,
+      "reference_shares": 0,
+      "entry_price": null,
+      "position_value": 0.0,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": 0.045674437703721565,
-      "dollar_pnl": 65.24919671960224
+      "cumulative_pnl": 0.03882773701746435,
+      "dollar_pnl": 55.46819573923479
     },
     "CRWD|CRWD_XLK_spread|rsi|trend_reverse_long|L37|T35.0": {
       "signal": 1.0,
-      "last_bar": "2026-10-20 10:00:00",
-      "last_price": 227.32,
+      "last_bar": "2026-10-20 14:00:00",
+      "last_price": 228.56,
       "reference_shares": 6,
       "entry_price": 227.71,
-      "position_value": 1363.92,
+      "position_value": 1371.3600000000001,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": -0.012947815955776137,
-      "dollar_pnl": -18.496879936823053
+      "cumulative_pnl": -0.007462637325824455,
+      "dollar_pnl": -10.660910465463509
     },
     "CRWD|CRWD_QQQ_spread|zscore|trend_reverse_long|L40|T-0.75": {
       "signal": 1.0,
-      "last_bar": "2026-10-20 10:00:00",
-      "last_price": 227.32,
+      "last_bar": "2026-10-20 14:00:00",
+      "last_price": 228.56,
       "reference_shares": 6,
       "entry_price": 225.62,
-      "position_value": 1363.92,
+      "position_value": 1371.3600000000001,
       "allocated_capital": 1428.5714285714287,
-      "cumulative_pnl": 0.23070444798840717,
-      "dollar_pnl": 329.5777828405817
+      "cumulative_pnl": 0.23618962661835885,
+      "dollar_pnl": 337.4137523119412
     }
   },
-  "last_bar": "2026-10-20 10:00:00",
+  "last_bar": "2026-10-20 14:00:00",
   "last_daily_summary": null,
   "started": true,
   "daily_date": "2026-10-20",
