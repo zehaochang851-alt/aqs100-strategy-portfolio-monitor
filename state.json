@@ -14,7 +14,7 @@
     "HWKN|VIX_close|min_max|trend_long|L50|T0.8500000000000016": {
       "signal": 0.0,
       "last_bar": "2026-11-09 15:00:00",
-      "last_price": 154.935,
+      "last_price": 154.73,
       "reference_shares": 0,
       "entry_price": null,
       "position_value": 0.0,
@@ -79,9 +79,9 @@
     }
   },
   "last_bar": "2026-11-09 15:00:00",
-  "last_daily_summary": "2026-11-09",
+  "last_daily_summary": null,
   "started": true,
-  "daily_date": "2026-11-09",
-  "daily_anchor_pnl": 0.07825682692108613,
+  "daily_date": "2026-11-10",
+  "daily_anchor_pnl": 0.08454462047703201,
   "telegram_chat_id": "7055440007"
 }
